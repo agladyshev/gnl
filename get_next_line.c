@@ -6,12 +6,18 @@
 /*   By: stiffiny <stiffiny@student.21-school.ru>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/02 17:17:07 by stiffiny          #+#    #+#             */
-/*   Updated: 2021/06/23 12:26:41 by stiffiny         ###   ########.fr       */
+/*   Updated: 2021/06/23 18:05:52 by stiffiny         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 #include <stdio.h>
+
+int	free_on_error(char *buf)
+{
+	free(buf);
+	return (-1);
+}
 
 char	*get_cached_line(char **cache, char **line)
 {
@@ -37,8 +43,6 @@ char	*get_cached_line(char **cache, char **line)
 			*cache = 0;
 		}
 	}
-	else
-		*line = ft_strdup("");
 	return (newline);
 }
 
@@ -50,14 +54,20 @@ int	get_next_line(int fd, char **line)
 	char		*swap;
 	int			bytes_read;
 
-	buf = malloc(sizeof(char) * (BUFFER_SIZE + 1));
 	if (line == 0 || fd < 0 || BUFFER_SIZE == 0)
+		return (-1);
+	buf = malloc(sizeof(char) * (BUFFER_SIZE + 1));
+	if (!buf)
 		return (-1);
 	newline = get_cached_line(&cache, line);
 	//printf("{%s}\n", *line);
 	while (newline == 0)
 	{
 		bytes_read = read(fd, buf, BUFFER_SIZE);
+		if (bytes_read == -1)
+			return (free_on_error(buf));
+		if (*line == 0)
+			*line = ft_strdup("");
 		if (!bytes_read)
 			break ;
 		buf[bytes_read] = 0;
@@ -73,7 +83,7 @@ int	get_next_line(int fd, char **line)
 		free(swap);
 	}
 	free(buf);
-	if (bytes_read || **line || cache)
-		return (1);
-	return (0);
+	if (bytes_read == 0)
+		return (0);
+	return (1);
 }
