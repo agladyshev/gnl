@@ -51,7 +51,7 @@ int	get_next_line(int fd, char **line)
 	int			bytes_read;
 
 	buf = malloc(sizeof(char) * (BUFFER_SIZE + 1));
-	if (line == 0 || fd < 0)
+	if (line == 0 || fd < 0 || BUFFER_SIZE == 0)
 		return (-1);
 	newline = get_cached_line(&cache, line);
 	//printf("{%s}\n", *line);
