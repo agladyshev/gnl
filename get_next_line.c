@@ -20,10 +20,12 @@ char	*get_cached_line(char **cache, char **line)
 	newline = 0;
 	if (*cache)
 	{
+		//printf("|%s|\n", *cache);
 		newline = ft_strchr(*cache, '\n');
 		if (newline)
 		{
-			newline = 0;
+			//printf("{%s}\n", newline);
+			*newline = 0;
 			*line = ft_strdup(*cache);
 			newline++;
 			ft_strcpy(*cache, newline);
@@ -43,14 +45,16 @@ char	*get_cached_line(char **cache, char **line)
 int	get_next_line(int fd, char **line)
 {
 	static char	*cache;
-	char		buf[BUFFER_SIZE + 1];
+	char		*buf;
 	char		*newline;
 	char		*swap;
 	int			bytes_read;
 
+	buf = malloc(sizeof(char) * (BUFFER_SIZE + 1));
 	if (line == 0 || fd < 0)
 		return (-1);
 	newline = get_cached_line(&cache, line);
+	//printf("{%s}\n", *line);
 	while (newline == 0)
 	{
 		bytes_read = read(fd, buf, BUFFER_SIZE);
@@ -68,6 +72,7 @@ int	get_next_line(int fd, char **line)
 		*line = ft_strjoin(*line, buf);
 		free(swap);
 	}
+	free(buf);
 	if (bytes_read || **line || cache)
 		return (1);
 	return (0);
