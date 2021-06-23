@@ -6,7 +6,7 @@
 /*   By: stiffiny <stiffiny@student.21-school.ru>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/02 17:17:07 by stiffiny          #+#    #+#             */
-/*   Updated: 2021/06/23 18:05:52 by stiffiny         ###   ########.fr       */
+/*   Updated: 2021/06/23 19:27:38 by stiffiny         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,6 +68,7 @@ int	get_next_line(int fd, char **line)
 			return (free_on_error(buf));
 		if (*line == 0)
 			*line = ft_strdup("");
+		//printf("Bytes:%d\n", bytes_read);
 		if (!bytes_read)
 			break ;
 		buf[bytes_read] = 0;
@@ -83,7 +84,7 @@ int	get_next_line(int fd, char **line)
 		free(swap);
 	}
 	free(buf);
-	if (bytes_read == 0)
+	if (bytes_read == 0 && cache == 0)
 		return (0);
 	return (1);
 }
