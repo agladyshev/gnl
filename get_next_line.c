@@ -6,7 +6,7 @@
 /*   By: stiffiny <stiffiny@student.21-school.ru>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/02 17:17:07 by stiffiny          #+#    #+#             */
-/*   Updated: 2021/06/23 19:27:38 by stiffiny         ###   ########.fr       */
+/*   Updated: 2021/06/23 19:35:51 by stiffiny         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,8 @@ int	free_on_error(char *buf)
 char	*get_cached_line(char **cache, char **line)
 {
 	char	*newline;
-
+	
+	*line = 0;
 	newline = 0;
 	if (*cache)
 	{
@@ -61,6 +62,7 @@ int	get_next_line(int fd, char **line)
 		return (-1);
 	newline = get_cached_line(&cache, line);
 	//printf("{%s}\n", *line);
+	bytes_read = 0;
 	while (newline == 0)
 	{
 		bytes_read = read(fd, buf, BUFFER_SIZE);
