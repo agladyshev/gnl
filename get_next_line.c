@@ -6,17 +6,17 @@
 /*   By: stiffiny <stiffiny@student.21-school.ru>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/02 17:17:07 by stiffiny          #+#    #+#             */
-/*   Updated: 2021/06/23 19:35:51 by stiffiny         ###   ########.fr       */
+/*   Updated: 2021/06/24 11:19:23 by stiffiny         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 #include <stdio.h>
 
-int	free_on_error(char *buf)
+int	free_on_exit(int status, char *buf)
 {
 	free(buf);
-	return (-1);
+	return (status);
 }
 
 char	*get_cached_line(char **cache, char **line)
@@ -61,16 +61,14 @@ int	get_next_line(int fd, char **line)
 	if (!buf)
 		return (-1);
 	newline = get_cached_line(&cache, line);
-	//printf("{%s}\n", *line);
 	bytes_read = 0;
 	while (newline == 0)
 	{
 		bytes_read = read(fd, buf, BUFFER_SIZE);
 		if (bytes_read == -1)
-			return (free_on_error(buf));
+			return (free_on_exit(-1, buf));
 		if (*line == 0)
 			*line = ft_strdup("");
-		//printf("Bytes:%d\n", bytes_read);
 		if (!bytes_read)
 			break ;
 		buf[bytes_read] = 0;
@@ -85,8 +83,7 @@ int	get_next_line(int fd, char **line)
 		*line = ft_strjoin(*line, buf);
 		free(swap);
 	}
-	free(buf);
 	if (bytes_read == 0 && cache == 0)
-		return (0);
-	return (1);
+		return (free_on_exit(0, buf));
+	return (free_on_exit(1, buf));
 }
