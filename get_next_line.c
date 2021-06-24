@@ -6,36 +6,33 @@
 /*   By: stiffiny <stiffiny@student.21-school.ru>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/02 17:17:07 by stiffiny          #+#    #+#             */
-/*   Updated: 2021/06/24 11:19:23 by stiffiny         ###   ########.fr       */
+/*   Updated: 2021/06/24 12:19:33 by stiffiny         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
-#include <stdio.h>
 
 int	free_on_exit(int status, char *buf)
 {
-	free(buf);
+	if (buf)
+		free(buf);
 	return (status);
 }
 
-char	*get_cached_line(char **cache, char **line)
+char	*get_cached_line(char **cache, char **line, int *fd)
 {
-	char	*newline;
-	
-	*line = 0;
-	newline = 0;
+	char	*eol_ptr;
+
+	eol_ptr = 0;
 	if (*cache)
 	{
-		//printf("|%s|\n", *cache);
-		newline = ft_strchr(*cache, '\n');
-		if (newline)
+		eol_ptr = ft_strchr(*cache, '\n');
+		if (eol_ptr)
 		{
-			//printf("{%s}\n", newline);
-			*newline = 0;
+			*eol_ptr = 0;
 			*line = ft_strdup(*cache);
-			newline++;
-			ft_strcpy(*cache, newline);
+			eol_ptr++;
+			ft_strcpy(*cache, eol_ptr);
 		}
 		else
 		{
@@ -43,47 +40,49 @@ char	*get_cached_line(char **cache, char **line)
 			free(*cache);
 			*cache = 0;
 		}
+		if (*line == 0)
+			*fd = -1;
 	}
-	return (newline);
+	return (eol_ptr);
+}
+
+void	split_buffer(char **line, char **eol_ptr, char **cache, char *buf)
+{
+	char	*swap;
+
+	if (*eol_ptr)
+	{
+		**eol_ptr = 0;
+		*cache = ft_strdup(++(*eol_ptr));
+	}
+	swap = *line;
+	*line = ft_strjoin(*line, buf);
+	free(swap);
 }
 
 int	get_next_line(int fd, char **line)
 {
 	static char	*cache;
 	char		*buf;
-	char		*newline;
-	char		*swap;
+	char		*eol_ptr;
 	int			bytes_read;
 
-	if (line == 0 || fd < 0 || BUFFER_SIZE == 0)
-		return (-1);
 	buf = malloc(sizeof(char) * (BUFFER_SIZE + 1));
-	if (!buf)
-		return (-1);
-	newline = get_cached_line(&cache, line);
-	bytes_read = 0;
-	while (newline == 0)
+	eol_ptr = get_cached_line(&cache, line, &fd);
+	if (line == 0 || fd < 0 || BUFFER_SIZE == 0 || !buf)
+		return (free_on_exit(-1, buf));
+	while (eol_ptr == 0)
 	{
 		bytes_read = read(fd, buf, BUFFER_SIZE);
-		if (bytes_read == -1)
-			return (free_on_exit(-1, buf));
-		if (*line == 0)
+		if (*line == 0 && bytes_read >= 0)
 			*line = ft_strdup("");
-		if (!bytes_read)
-			break ;
+		if (bytes_read <= 0)
+			return (free_on_exit(bytes_read, buf));
 		buf[bytes_read] = 0;
-		newline = ft_strchr(buf, '\n');
-		if (newline)
-		{
-			*newline = 0;
-			newline++;
-			cache = ft_strdup(newline);
-		}
-		swap = *line;
-		*line = ft_strjoin(*line, buf);
-		free(swap);
+		eol_ptr = ft_strchr(buf, '\n');
+		split_buffer(line, &eol_ptr, &cache, buf);
+		if (*line == 0)
+			free_on_exit(-1, buf);
 	}
-	if (bytes_read == 0 && cache == 0)
-		return (free_on_exit(0, buf));
-	return (free_on_exit(1, buf));
+	return (free_on_exit((cache != 0), buf));
 }
