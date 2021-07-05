@@ -6,7 +6,7 @@
 /*   By: stiffiny <stiffiny@student.21-school.ru>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/02 17:17:07 by stiffiny          #+#    #+#             */
-/*   Updated: 2021/06/24 13:44:56 by stiffiny         ###   ########.fr       */
+/*   Updated: 2021/07/05 18:03:18 by stiffiny         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ char	*get_cached_line(char **cache, char **line, int *fd)
 	char	*eol_ptr;
 
 	eol_ptr = 0;
-	if (*cache)
+	if (*cache && line)
 	{
 		eol_ptr = ft_strchr(*cache, '\n');
 		if (eol_ptr)
@@ -67,6 +67,8 @@ int	get_next_line(int fd, char **line)
 	char		*eol_ptr;
 	int			bytes_read;
 
+	if (line != 0)
+		*line = 0;
 	buf = malloc(sizeof(char) * (BUFFER_SIZE + 1));
 	eol_ptr = get_cached_line(&cache, line, &fd);
 	if (line == 0 || fd < 0 || BUFFER_SIZE <= 0 || !buf)
